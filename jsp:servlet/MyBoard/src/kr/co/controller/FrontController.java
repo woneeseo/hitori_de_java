@@ -16,6 +16,9 @@ import kr.co.command.InsertCommand;
 import kr.co.command.InsertUICommand;
 import kr.co.command.ListCommand;
 import kr.co.command.ReadCommand;
+import kr.co.command.RelpyUICommand;
+import kr.co.command.ReplyCommand;
+import kr.co.command.SearchCommand;
 import kr.co.command.UpdateCommand;
 import kr.co.command.UpdateUICommand;
 import kr.co.domain.CommandAction;
@@ -60,6 +63,12 @@ public class FrontController extends HttpServlet {
 			com = new UpdateCommand();
 		} else if (sp.equalsIgnoreCase("/delete.do")) {
 			com = new DeleteCommand();
+		} else if (sp.equalsIgnoreCase("/search.do")) {
+			com = new SearchCommand();
+		} else if (sp.equalsIgnoreCase("/replyui.do")) {
+			com = new RelpyUICommand();
+		} else if (sp.equalsIgnoreCase("/reply.do")) {
+			com = new ReplyCommand();
 		}
 		
 		

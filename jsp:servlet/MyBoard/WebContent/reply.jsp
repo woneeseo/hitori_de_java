@@ -1,4 +1,3 @@
-<%@page import="kr.co.domain.BoardDTO"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
     
@@ -10,27 +9,24 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>글 자세히 보기</title>
+<title>답글 화면</title>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 </head>
 <body>
 
-	<h1>글 자세히 보기</h1>
+<h1>글번호 ${param.num}의 답글 화면</h1>	
+<!-- 내장객체 param을 이용해서 num을 가져옴 -->
+	<form action="reply.do" method="post">
+		<input type="hidden" name="num" value="${param.num}"><br>
+		작성자 : <input name="author"><br>
+		제목 : <input name="title"><br>
+		내용 : <br>
+		<textarea rows="5" name="content"></textarea>
+		<br>
+		
+		<input type="submit" value="답글 등록">
 	
-	글번호 : ${dto.num}<br>
-	작성자 : ${dto.author}<br>
-	작성일 : ${dto.writeday}<br>
-	조회수 : ${dto.readcnt}<br>
-	제목 : ${dto.title}<br>
-	내용 :
-	<p>
-		${dto.content}
-	</p>
-	
-	<a href="updateui.do?num=${dto.num}">수정</a> 
-	<a id="del" href="delete.do?num=${dto.num}">삭제</a>
-	<a href="replyui.do?num=${dto.num}">답글</a>
-	
+	</form>
 
 </body>
 </html>

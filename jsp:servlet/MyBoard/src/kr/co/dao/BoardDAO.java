@@ -183,17 +183,21 @@ public class BoardDAO {
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		String sql = "SELECT * FROM myboard WHERE num = ? ";
-		boolean isOK = false; 
+		boolean isOK = false;
 		/* 트랜잭션을 위해서 선언한 변수, isOK가 false값을 유지한다면 정상적으로 작입이 이루어졌다는 이야기 */
-
-		// read.jsp에서 ${dto.num}으로 값을 넘겨줬으므로, num을 이용해 찾기 : num은 pk이기 때문에 검색결과도 단 하나만
-		// 나온다.
+		// 트랜잭션을 왜 해야하나? read()가 실행되면, read()내부의 increaseReadcnt()도 실행되게 되는데
+		// 두 메서드는 같은 자원(myboard)에 접근하여 각각의 요청에 대해 자원의 데이터를 가져오거나 변경한다.
+		// (게시글 자세히보기를 클릭하면 -> 조회수가 1 오른다)
+		// 이 때, 어딘가에서 작업이 중간에 중단되는 경우, 어느 한 메서드가 기능을 완료하지 못했는데 다른 메서드에서 지정해준 기능이 수행되면
+		// 원하는 결과와 다른 값을 가지게 된다. -> 트랜잭션 상황이 발생한다.
+		// 따라서, 트랜잭션 상황을 처리(rollback()이나 commit())해 실행하고자 했던 결과가 정상적으로 동작하도록 해준다.
 
 		try {
 			conn = dataFatory.getConnection();
 			conn.setAutoCommit(false);
+			// 트랜잭션 상황을 처리하기 위해서는 autocommit을 종료해줘야 한다. (false로 종료시킴)
 			increaseReadcnt(conn, num);
-
+			// 글 자세히보기를 할 때마다 조회수를 1씩 올려주는 메서드
 			pstmt = conn.prepareStatement(sql);
 
 			pstmt.setInt(1, num);
@@ -201,7 +205,8 @@ public class BoardDAO {
 			rs = pstmt.executeQuery();
 
 			if (rs.next()) {
-
+				// read.jsp에서 ${dto.num}으로 값을 넘겨줬으므로, num을 이용해 찾기 :
+				// num은 pk이기 때문에 검색결과도 단 하나만 나온다.
 				String author = rs.getString("author");
 				String title = rs.getString("title");
 				String content = rs.getString("content");
@@ -211,27 +216,31 @@ public class BoardDAO {
 				dto = new BoardDTO(num, author, title, content, writeday, readcnt, -1, -1, -1);
 
 			}
-			
+
 			isOK = true;
+			// 여기까지 작업이 정상적으로 이루어졌다면 isOK는 true로 값을 변경해준다
 
 		} catch (Exception e) {
-			
+
 			e.printStackTrace();
-			
+
 		} finally {
-			
+
+			// isOK 가 true를 값으로 가지면 동작이 정상적으로 이루어졌다는 의미이므로 commit()
+			// isOK 가 false를 값으로 가지면 동작이 정상적으로 이루어지지 않았다는 의미이므로 rollback()
+
 			try {
 				if (isOK) {
 					conn.commit();
 				} else {
 					conn.rollback();
 				}
-				
+
 			} catch (SQLException e) {
-				
+
 				e.printStackTrace();
 			}
-			
+
 			// 트랜잭션 순서 : boolean형의 isOK변수를 선언해 false로 초기화한다
 			// 커넥션의 autocommit을 해제해준다 (파라미터로 false)
 			// try문의 마지막 행에 isOK=true; 를 대입해준다. 코드가 정상적으로 실행되었다면 isOK는 true 값을 가진다
@@ -239,7 +248,7 @@ public class BoardDAO {
 			// 넘겨받은 isOK의 값이 true라면? -> commit();
 			// 그렇지 않고 false라면 rollback();
 			// 묶어서 try-catch를 해준다.
-			
+
 			closeAll(rs, pstmt, conn);
 		}
 		return dto;
@@ -251,19 +260,20 @@ public class BoardDAO {
 		// num은 read()에서 넘겨받는 파라미터를 그대로 사용할 수 있도록 increas의 파라미터에도 num을 설정해준다
 
 		PreparedStatement pstmt = null;
+		// connection객체를 만들지 않아도 된다 : 파라미터로 넘겨받았기 때문
 		String sql = "UPDATE myboard SET readcnt = readcnt +1 WHERE num = ?";
-		
+
 		// where 조건이 없이 update문을 작성하게 되면,
 		// db에 저장되어있는 모든 데이터의 readcnt 수가 +1이 되므로 where조건을 반드시 넣어줄것
-		// where 의 num 값은 read에서 넘어오는 파라미터 값을 그대로 쓸 수 있도록 inc~()에도 파라미터로 num값을 넘겨준다
-		
+		// where 의 num 값은 read에서 넘어오는 파라미터 값을 그대로 쓸 수 있도록 inc~()에도 파라미터로 num값을 준다
+
 		try {
 			pstmt = conn.prepareStatement(sql);
-			
+
 			pstmt.setInt(1, num);
-			
+
 			pstmt.executeUpdate();
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
@@ -273,86 +283,138 @@ public class BoardDAO {
 	}
 
 	public BoardDTO updateui(int num) {
-		
+
 		BoardDTO dto = null;
 		Connection conn = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		String sql = "SELECT * FROM myboard WHERE num = ? ";
-		
+
 		try {
 			conn = dataFatory.getConnection();
 			pstmt = conn.prepareStatement(sql);
-			
+
 			pstmt.setInt(1, num);
-			
+
 			rs = pstmt.executeQuery();
-			
+
 			if (rs.next()) {
-				
+
 				String author = rs.getString("author");
 				String title = rs.getString("title");
 				String content = rs.getString("content");
 				String writeday = rs.getString("writeday");
 				int readcnt = rs.getInt("readcnt");
-				
+
 				dto = new BoardDTO(num, author, title, content, writeday, readcnt, 0, 0, 0);
 			}
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
 			closeAll(rs, pstmt, conn);
 		}
-		
+
 		return dto;
 	}
 
 	public void update(BoardDTO dto) {
-		
+
 		Connection conn = null;
 		PreparedStatement pstmt = null;
 		String sql = "UPDATE myboard SET title = ?, author = ?, content=?, writeday=sysdate WHERE num=?";
 
-		
 		try {
 			conn = dataFatory.getConnection();
 			pstmt = conn.prepareStatement(sql);
-			
+
 			pstmt.setString(1, dto.getAuthor());
 			pstmt.setString(2, dto.getTitle());
 			pstmt.setString(3, dto.getContent());
 			pstmt.setInt(4, dto.getNum());
-			
+
 			pstmt.executeUpdate();
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
 			closeAll(null, pstmt, conn);
 		}
-		
+
 	}
 
 	public void delete(int num) {
-		
+
 		Connection conn = null;
 		PreparedStatement pstmt = null;
 		String sql = "DELETE FROM myboard WHERE num = ? ";
-		
+
 		try {
 			conn = dataFatory.getConnection();
 			pstmt = conn.prepareStatement(sql);
-			
+
 			pstmt.setInt(1, num);
-			
+
 			pstmt.executeUpdate();
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
 			closeAll(null, pstmt, conn);
 		}
+	}
+
+
+	public List<BoardDTO> search(String searchOption, String searchKeyword) {
+
+		List<BoardDTO> list = new ArrayList<BoardDTO>();
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		String sql = "SELECT * FROM myboard WHERE upper(" + searchOption + ") LIKE upper(?) ORDER BY repRoot desc, repStep asc ";
+		
+		// 문자열의 + 성질을 이용한다. searchOption 는 컬럼명을 대신하는 변수
+		// 검색버튼을 통해 타고 온 jsp에서의 옵션값이 들어오게 된다. (ex, title/author/content...)
+		// sql문을 = 로 주지 않는 이유 : 완전 일치한 결과만 가져오기 때문에 LIKE 키워드를 사용해야 함
+		
+		// upper(searchOption)을 지정하는 경우 : 입력한 키워드와 DB에서 가져올 키워드를 둘 다 대문자, 둘 다 소문자등 동일한 형식으로 만들어줘야함
+		// 입력한 키워드는 대문자인데, DB에 소문자로 저장된 경우 검색이 안되는 것을 방지하기 위해서
+		
+		ResultSet rs = null;
+
+		try {
+			conn = dataFatory.getConnection();
+			pstmt = conn.prepareStatement(sql);
+
+			pstmt.setString(1, "%" + searchKeyword + "%");
+			// 해당 키워드가 어디에 어떻게 들어있는지 정확히 알지 못할 때 %키워드% 형식으로 입력해주면
+			// 키워드에 대한 정확한 정보가 없어도 해당 키워드가 확실히 포함되어 있다면 가져오는 것이 가능하다
+			rs = pstmt.executeQuery();
+
+			while (rs.next()) {
+
+				int num = rs.getInt("num");
+				String author = rs.getString("author");
+				String title = rs.getString("title");
+				String writeday = rs.getString("writeday");
+				int readcnt = rs.getInt("readcnt");
+				int repIndent = rs.getInt("repIndent");
+
+				BoardDTO dto = new BoardDTO(num, author, title, null, writeday, readcnt, -1, -1, repIndent);
+				list.add(dto);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			closeAll(rs, pstmt, conn);
+		}
+
+		return list;
+	}
+
+	public void reply(int oriNum, BoardDTO repDTO) {
+		
+		
 	}
 
 }
