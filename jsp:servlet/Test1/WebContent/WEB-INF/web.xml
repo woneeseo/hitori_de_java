@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" id="WebApp_ID" version="3.0">
+  <display-name>Test1</display-name>
+  <welcome-file-list>
+    <welcome-file>index.html</welcome-file>
+    <welcome-file>index.htm</welcome-file>
+    <welcome-file>index.jsp</welcome-file>
+    <welcome-file>default.html</welcome-file>
+    <welcome-file>default.htm</welcome-file>
+    <welcome-file>default.jsp</welcome-file>
+  </welcome-file-list>
+  
+  <!-- web.xml에서 servlet mapping하기 -->
+  <!-- servlet mapping : url(servlet path)과 servlet class 를 연결시켜주는 것. -->
+  
+  <servlet>
+  	<servlet-name>test1</servlet-name>
+  	<!-- servlet-name : web.xml 내부적으로만 인식되는 이름 -> 브라우저에서 검색 안됨 -->
+  	<!-- web.xml내부에서 url과 서블릿을 연결시켜주는 역할을 함 -->
+  	<!-- url패턴과 맵핑을 해 주면, 웹 브라우저에서 url패턴이 실행될 떄 -->
+  	<!-- 같은 서블릿네임을 가진 서블릿클래스를 실행시킨다 -->
+  	<servlet-class>kr.co.ezen.Myservlet1</servlet-class>
+  	<!-- 반드시 풀 패키지명으로 입력해줘야 하며, 위와 같은 서식을 가진다. -->
+  	<!-- 원래 풀 패키지명 : /Test1/src/kr/co/ezen/Myservlet1.java -->
+  
+  </servlet>
+  
+  <servlet-mapping>
+ 	<servlet-name>test1</servlet-name>
+  	<url-pattern>/insertui</url-pattern>
+  	<!-- 브라우저에 들어갈 url값 (servlet-paht) : 브라우저를 실행하면 url에 표시됨 -->
+  	<!-- http://localhost:8089/Test1/insertui -->
+  	<!-- 서블릿 클래스와 url패턴을 연결시켜줘야 함 : 서블릿네임을 동일하게 부여 -->
+  	
+  </servlet-mapping>
+  
+  <servlet>
+  	<servlet-name>test2</servlet-name>
+  	<servlet-class>kr.co.ezen.YourServlet1</servlet-class>
+  </servlet>
+  
+  <servlet-mapping>
+  	<servlet-name>test2</servlet-name>
+  	<url-pattern>/insert</url-pattern>
+  </servlet-mapping>
+  
+  <servlet>
+  	<servlet-name>test3</servlet-name>
+  	<servlet-class>kr.co.ezen.HisServlet</servlet-class>
+  	
+  </servlet>
+  
+  <servlet-mapping>
+  	<servlet-name>test3</servlet-name>
+  	<url-pattern>*.do aaaa</url-pattern>
+  </servlet-mapping>
+  
+  <servlet>
+  	<servlet-name>test4</servlet-name>
+  	<servlet-class>kr.co.ezen.HerServlet</servlet-class>
+  </servlet>
+  
+  <servlet-mapping>
+  	<servlet-name>test4</servlet-name>
+  	<url-pattern>/updateui</url-pattern>
+  </servlet-mapping>
+ 
+ 
+</web-app>

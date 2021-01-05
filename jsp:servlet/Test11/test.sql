@@ -1,0 +1,7 @@
+CREATE TABLE member(
+	id VARCHAR2(6) PRIMARY KEY,
+	name VARCHAR2(15) NOT NULL,
+	age NUMBER(3) CHECK(age<200)
+)
+
+SELECT * FROM member
