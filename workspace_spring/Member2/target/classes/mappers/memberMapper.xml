@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.member">
+ 	<select id="getTime" resultType="string">
+ 		SELECT SYSDATE FROM DUAL
+ 	</select>
+ 	
+ 	<insert id="insert">
+ 		INSERT INTO member (userid, userpw, username, email) VALUES (#{userid}, #{userpw}, #{username}, #{email})
+ 	</insert>
+ 	 
+ 	<!-- sqlsession에 selectList()를 사용함 -> list타입으로 반환하겠다는 것을 이미 알고있다. --> 
+ 	<!-- 그래서 resultType에 java.util.List를 사용하지 않고 List 안의 제네릭타입을 적어준다 -->
+ 	<select id="list" resultType="kr.co.domain.MemberVO">
+ 		SELECT * FROM member
+ 	</select>
+ 	
+ 	<select id="read" resultType="kr.co.domain.MemberVO">
+ 		SELECT * FROM member WHERE userid = #{userid}
+ 	</select>
+ 	
+ 	<update id="update">
+ 		UPDATE member SET username = #{username}, email = #{email}, updatedate = SYSDATE WHERE userid = #{userid} AND userpw = #{userpw}
+ 	</update>
+ 	
+ 	<delete id="delete">
+ 		DELETE FROM member WHERE userid = #{userid} AND userpw = #{userpw}
+ 	</delete>
+</mapper>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.member">
+	<select id="getTime" resultType="string">SELECT SYSDATE FROM DUAL</select>
+	<!-- sql 뒤에 ; (세미콜론)을 넣으면 ORA-00911에러가 발생함 -->
+	<insert id="insert">
+		INSERT INTO member (userid, userpw, username, email) VALUES (#{userid},#{userpw},#{username},#{email})
+		<!-- mybatis에서는 외부에서 값을 입력할 때, ? 가 아닌 #{데이터컬럼명} 으로 입력한다. -->
+	</insert>
+	
+	<select id="list" resultType="kr.co.domain.MemberVO">
+		SELECT * FROM member
+	</select>
+	
+	<select id="read" resultType="kr.co.domain.MemberVO">
+		SELECT * FROM member WHERE userid = #{userid}
+	</select>
+	
+	<update id="update">
+		UPDATE member 
+		SET username = #{username}, email = #{email}, updatedate = SYSDATE 
+		WHERE userid = #{userid} AND userpw = #{userpw}
+	</update>
+	
+	<delete id="delete">
+		DELETE FROM member WHERE userid = #{userid} AND userpw = #{userpw}
+	</delete>
+
+</mapper>
